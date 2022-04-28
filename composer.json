@@ -12,7 +12,7 @@
     "require": {
         "php": "^7.1.3",
         "ext-redis": "*",
-        "dansan/jobboy": "^0.3.0"
+        "dansan/jobboy": "^0.4.0"
     },
     "require-dev": {
         "dansan/jobboy-test-pack":"*",
