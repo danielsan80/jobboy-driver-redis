@@ -31,7 +31,7 @@ class RedisTest extends TestCase
         ], $redis->keys('*'));
 
 
-        $redis->delete($redis->keys('*'));
+        $redis->del($redis->keys('*'));
 
         $this->assertEquals([], $redis->keys('*'));
 
@@ -53,7 +53,7 @@ class RedisTest extends TestCase
 
         $this->assertEquals(2, $redis->hLen('test'));
 
-        $redis->delete('test');
+        $redis->del('test');
 
         $this->assertEquals([
         ], $redis->hGetAll('test'));
