@@ -17,7 +17,7 @@
     "require-dev": {
         "dansan/jobboy-test-pack":"*",
         "dansan/fixture-handler": "*",
-        "symfony/framework-bundle": "^4.0||^5.0"
+        "symfony/framework-bundle": "^4.0||^5.0||^6.0||^7.0"
     },
     "config": {
         "preferred-install": {
