@@ -5,10 +5,10 @@ services:
 
   JobBoy\Retryer\Domain\DefaultRetryer:
     class: JobBoy\Retryer\Domain\DefaultRetryer
-    factory: ['@JobBoy\Retryer\Domain\DefaultRetryer\DefaultRetryerFactory', create]
+    factory: ['@JobBoy\Retryer\Domain\DefaultRetryerFactory', create]
     arguments:
       - 10
       - 500
 
   JobBoy\Retryer\Domain\DefaultRetryerFactory:
-    class: JobBoy\Retryer\Domain\\DefaultRetryerFactory
+    class: JobBoy\Retryer\Domain\DefaultRetryerFactory
