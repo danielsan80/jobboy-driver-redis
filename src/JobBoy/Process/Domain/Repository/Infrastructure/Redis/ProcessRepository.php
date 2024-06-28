@@ -9,6 +9,7 @@ use JobBoy\Process\Domain\Entity\Process;
 use JobBoy\Process\Domain\ProcessStatus;
 use JobBoy\Process\Domain\Repository\Infrastructure\Util\ProcessRepositoryUtil;
 use JobBoy\Process\Domain\Repository\ProcessRepositoryInterface;
+use JobBoy\Retryer\Domain\Retryer;
 
 class ProcessRepository implements ProcessRepositoryInterface
 {
@@ -21,9 +22,16 @@ class ProcessRepository implements ProcessRepositoryInterface
     protected $namespace;
 
     protected $touchCallback;
+    /** @var Retryer */
+    private $retryer;
 
-    public function __construct(\Redis $redis, ?string $namespace = null)
+    public function __construct(
+        Retryer $retryer,
+        \Redis $redis,
+        ?string $namespace = null
+    )
     {
+        $this->retryer = $retryer;
         $this->redis = $redis;
         if (!$namespace) {
             $namespace = self::DEFAULT_NAMESPACE;
@@ -140,13 +148,23 @@ class ProcessRepository implements ProcessRepositoryInterface
 
     protected function _all(): array
     {
-        $processes = $this->redis->hGetAll($this->namespace);
+        $processes = $this->retryer->try(
+            function () {
+                $processes = $this->redis->hGetAll($this->namespace);
+                Assertion::isArray($processes, 'Redis returned a non-array value');
 
-        Assertion::isArray($processes, 'Redis returned a non-array value');
+                return $processes;
+            },
+            function (\Throwable $e, int $currentAttempt) {
+                return $e instanceof \InvalidArgumentException;
+            }
+        );
+
 
         array_walk($processes, function ($process) {
             $process->addTouchCallback($this->touchCallback);
         });
+
         return $processes;
     }
 

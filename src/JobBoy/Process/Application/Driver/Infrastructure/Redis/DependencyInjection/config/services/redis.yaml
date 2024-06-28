@@ -14,5 +14,6 @@ services:
   JobBoy\Process\Domain\Repository\Infrastructure\Redis\ProcessRepository:
     class: JobBoy\Process\Domain\Repository\Infrastructure\Redis\ProcessRepository
     arguments:
+      - '@JobBoy\Retryer\Domain\Retryer'
       - '@jobboy.process_repository.redis'
       - '%jobboy.process_repository.redis.namespace%'
