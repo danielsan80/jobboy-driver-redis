@@ -8,6 +8,8 @@ use JobBoy\Process\Domain\Repository\Infrastructure\Redis\ProcessRepository;
 use JobBoy\Process\Domain\Repository\Infrastructure\Redis\RedisFactory;
 use JobBoy\Process\Domain\Repository\ProcessRepositoryInterface;
 use JobBoy\Process\Domain\Repository\Test\ProcessRepositoryInterfaceTest;
+use JobBoy\Retryer\Domain\DefaultRetryer;
+use JobBoy\Retryer\Domain\FibonacciRetryWaitManager;
 use Ramsey\Uuid\Uuid;
 
 class ProcessRepositoryTest extends ProcessRepositoryInterfaceTest
@@ -18,10 +20,14 @@ class ProcessRepositoryTest extends ProcessRepositoryInterfaceTest
     {
         $redisFactory = new RedisFactory('redis');
         $redis = $redisFactory->create();
+        $retryer = new DefaultRetryer(
+            new FibonacciRetryWaitManager(1),
+            5
+        );
 
         $id = Uuid::uuid4();
 
-        return new ProcessRepository($redis, 'test.jobboy.processes.' . $id);
+        return new ProcessRepository($retryer, $redis, 'test.jobboy.processes.' . $id);
     }
 
     protected function createFactory(): ProcessFactory
