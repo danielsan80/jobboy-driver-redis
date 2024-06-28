@@ -1,0 +1,14 @@
+services:
+
+  JobBoy\Retryer\Domain\Retryer:
+    alias: JobBoy\Retryer\Domain\DefaultRetryer
+
+  JobBoy\Retryer\Domain\DefaultRetryer:
+    class: JobBoy\Retryer\Domain\DefaultRetryer
+    factory: ['@JobBoy\Retryer\Domain\DefaultRetryer\DefaultRetryerFactory', create]
+    arguments:
+      - 10
+      - 500
+
+  JobBoy\Retryer\Domain\DefaultRetryerFactory:
+    class: JobBoy\Retryer\Domain\\DefaultRetryerFactory
