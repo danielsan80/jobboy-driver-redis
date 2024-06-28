@@ -141,6 +141,9 @@ class ProcessRepository implements ProcessRepositoryInterface
     protected function _all(): array
     {
         $processes = $this->redis->hGetAll($this->namespace);
+
+        Assertion::isArray($processes, 'Redis returned a non-array value');
+
         array_walk($processes, function ($process) {
             $process->addTouchCallback($this->touchCallback);
         });
