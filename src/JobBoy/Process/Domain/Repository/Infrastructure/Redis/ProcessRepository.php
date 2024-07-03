@@ -123,13 +123,26 @@ class ProcessRepository implements ProcessRepositoryInterface
     protected function _set(TouchCallbackProcess $process): void
     {
         $process->removeTouchCallback($this->touchCallback);
-        $this->redis->hset($this->namespace, (string)$process->id(), $process);
+
+        $this->retryer->try(
+            function() use ($process) {
+                $this->redis->hset($this->namespace, (string)$process->id(), $process);
+            }
+        );
+
         $process->addTouchCallback($this->touchCallback);
     }
 
     protected function _get(string $id): ?TouchCallbackProcess
     {
-        $process = $this->redis->hget($this->namespace, $id);
+        $process = $this->retryer->try(
+            function() use ($id) {
+                $process = $this->redis->hget($this->namespace, $id);
+                Assertion::nullOrIsInstanceOf($process, Process::class, 'Redis returned an invalid value');
+
+                return $process;
+            }
+        );
 
         if ($process === false) {
             return null;
@@ -142,7 +155,11 @@ class ProcessRepository implements ProcessRepositoryInterface
 
     protected function _unset(TouchCallbackProcess $process): void
     {
-        $this->redis->hDel($this->namespace, (string)$process->id());
+        $this->retryer->try(
+            function() use ($process) {
+                $this->redis->hDel($this->namespace, (string)$process->id());
+            }
+        );
         $process->removeTouchCallback($this->touchCallback);
     }
 
@@ -154,9 +171,6 @@ class ProcessRepository implements ProcessRepositoryInterface
                 Assertion::isArray($processes, 'Redis returned a non-array value');
 
                 return $processes;
-            },
-            function (\Throwable $e, int $currentAttempt) {
-                return $e instanceof \InvalidArgumentException;
             }
         );
 
